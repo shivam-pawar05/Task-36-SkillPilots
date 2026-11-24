@@ -1,0 +1,15 @@
+# Full RMAN backup template. Change the directory for your Oracle server.
+# The directory must exist and be writable by the Oracle database process.
+CONNECT TARGET /
+SHOW ALL;
+RUN {
+  ALLOCATE CHANNEL ch1 DEVICE TYPE DISK
+    FORMAT '/u01/backup/rman/full_%d_%T_%U.bkp';
+  BACKUP AS COMPRESSED BACKUPSET DATABASE PLUS ARCHIVELOG;
+  BACKUP CURRENT CONTROLFILE
+    FORMAT '/u01/backup/rman/control_%d_%T_%U.bkp';
+  RELEASE CHANNEL ch1;
+}
+CROSSCHECK BACKUP;
+LIST BACKUP SUMMARY;
+RESTORE DATABASE VALIDATE;

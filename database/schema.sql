@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS categories (category_id SERIAL PRIMARY KEY, category_name VARCHAR(100) NOT NULL UNIQUE);
+CREATE TABLE IF NOT EXISTS suppliers (supplier_id SERIAL PRIMARY KEY, supplier_name VARCHAR(150) NOT NULL, email VARCHAR(150));
+CREATE TABLE IF NOT EXISTS customers (customer_id SERIAL PRIMARY KEY, customer_name VARCHAR(150) NOT NULL, email VARCHAR(150) UNIQUE);
+CREATE TABLE IF NOT EXISTS warehouses (warehouse_id SERIAL PRIMARY KEY, warehouse_name VARCHAR(120) NOT NULL, location VARCHAR(200));
+CREATE TABLE IF NOT EXISTS products (product_id SERIAL PRIMARY KEY, product_name VARCHAR(150) NOT NULL, category_id INTEGER REFERENCES categories(category_id), supplier_id INTEGER REFERENCES suppliers(supplier_id), price NUMERIC(12,2) NOT NULL CHECK(price >= 0), created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS inventory (inventory_id SERIAL PRIMARY KEY, product_id INTEGER NOT NULL REFERENCES products(product_id), warehouse_id INTEGER NOT NULL REFERENCES warehouses(warehouse_id), quantity INTEGER NOT NULL DEFAULT 0 CHECK(quantity >= 0), reorder_level INTEGER NOT NULL DEFAULT 5 CHECK(reorder_level >= 0), UNIQUE(product_id, warehouse_id));
+CREATE TABLE IF NOT EXISTS orders (order_id SERIAL PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES customers(customer_id), warehouse_id INTEGER NOT NULL REFERENCES warehouses(warehouse_id), order_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, total_amount NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK(total_amount >= 0));
+CREATE TABLE IF NOT EXISTS order_items (order_item_id SERIAL PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES orders(order_id) ON DELETE CASCADE, product_id INTEGER NOT NULL REFERENCES products(product_id), quantity INTEGER NOT NULL CHECK(quantity > 0), unit_price NUMERIC(12,2) NOT NULL CHECK(unit_price >= 0));
+CREATE TABLE IF NOT EXISTS product_audit (audit_id BIGSERIAL PRIMARY KEY, product_id INTEGER, operation VARCHAR(10) NOT NULL, old_product_name VARCHAR(150), new_product_name VARCHAR(150), changed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
+CREATE INDEX IF NOT EXISTS idx_inventory_product ON inventory(product_id);
+CREATE INDEX IF NOT EXISTS idx_orders_date ON orders(order_date);

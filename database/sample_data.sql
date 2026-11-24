@@ -1,0 +1,7 @@
+INSERT INTO categories(category_name) VALUES ('Electronics'),('Stationery'),('Accessories') ON CONFLICT DO NOTHING;
+INSERT INTO suppliers(supplier_name,email) SELECT 'Demo Supplier','supplier@example.com' WHERE NOT EXISTS(SELECT 1 FROM suppliers WHERE email='supplier@example.com');
+INSERT INTO customers(customer_name,email) VALUES('Demo Customer','customer@example.com') ON CONFLICT(email) DO NOTHING;
+INSERT INTO warehouses(warehouse_name,location) SELECT 'Main Warehouse','Nagpur' WHERE NOT EXISTS(SELECT 1 FROM warehouses WHERE warehouse_name='Main Warehouse');
+INSERT INTO products(product_name,category_id,supplier_id,price) SELECT 'Keyboard',c.category_id,s.supplier_id,800 FROM categories c CROSS JOIN suppliers s WHERE c.category_name='Electronics' AND s.email='supplier@example.com' AND NOT EXISTS(SELECT 1 FROM products WHERE product_name='Keyboard');
+INSERT INTO products(product_name,category_id,supplier_id,price) SELECT 'Notebook',c.category_id,s.supplier_id,60 FROM categories c CROSS JOIN suppliers s WHERE c.category_name='Stationery' AND s.email='supplier@example.com' AND NOT EXISTS(SELECT 1 FROM products WHERE product_name='Notebook');
+INSERT INTO inventory(product_id,warehouse_id,quantity,reorder_level) SELECT p.product_id,w.warehouse_id,CASE p.product_name WHEN 'Keyboard' THEN 40 ELSE 100 END,5 FROM products p CROSS JOIN warehouses w WHERE w.warehouse_name='Main Warehouse' ON CONFLICT(product_id,warehouse_id) DO NOTHING;

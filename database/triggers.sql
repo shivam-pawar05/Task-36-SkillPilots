@@ -1,0 +1,3 @@
+CREATE OR REPLACE FUNCTION audit_product_changes() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN IF TG_OP='UPDATE' THEN INSERT INTO product_audit(product_id,operation,old_product_name,new_product_name) VALUES(OLD.product_id,'UPDATE',OLD.product_name,NEW.product_name); RETURN NEW; ELSIF TG_OP='DELETE' THEN INSERT INTO product_audit(product_id,operation,old_product_name,new_product_name) VALUES(OLD.product_id,'DELETE',OLD.product_name,NULL); RETURN OLD; END IF; RETURN NULL; END; $$;
+DROP TRIGGER IF EXISTS trg_product_audit ON products;
+CREATE TRIGGER trg_product_audit AFTER UPDATE OR DELETE ON products FOR EACH ROW EXECUTE FUNCTION audit_product_changes();

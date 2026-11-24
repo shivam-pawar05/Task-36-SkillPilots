@@ -1,0 +1,12 @@
+# DISPOSABLE TEST INSTANCE ONLY. Review with DBA/instructor first.
+# Confirm DBID, backup pieces, archived redo, Oracle version and file paths.
+# For a different host, configure file-name conversion or SET NEWNAME as needed.
+CONNECT TARGET /
+LIST BACKUP SUMMARY;
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+RESTORE DATABASE;
+RECOVER DATABASE;
+# Open with RESETLOGS only if required by the recovery scenario and approved.
+ALTER DATABASE OPEN RESETLOGS;
+LIST BACKUP SUMMARY;
